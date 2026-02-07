@@ -182,6 +182,8 @@ services:
       # See https://airflow.apache.org/docs/docker-stack/entrypoint.html#signal-propagation
       DUMB_INIT_SETSID: "0"
     restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       <<: *airflow-common-depends-on
       airflow-apiserver:
@@ -344,6 +346,9 @@ services:
     ports:
       - "5433:5432"
 
+  python-runner:
+    image: python:3.12-alpine3.22
+    command: ["python", "-c", "print('hello world')"]
 
 volumes:
   postgres-db-volume:
