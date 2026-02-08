@@ -25,6 +25,56 @@ mostly for orchestration. In a cloud environment it would trigger Glue jobs, Dat
 (Operators) that actually ingest/transform the data. To simulate that I used the DockerOperator and created
 images for the ingestion script to run and for the transformations to run.
 
+```mermaid
+sequenceDiagram
+    participant S as Scheduler
+    participant R as Redis (Broker)
+    participant W as Worker
+    participant D as Docker Socket
+    participant API as WA.gov Socrata API
+    participant PG as postgres-warehouse
+
+    Note over S,PG: Ingestion DAG
+    S->>R: Enqueue ingestion task
+    R->>W: Worker picks up task
+    W->>D: DockerOperator: create ev-ingestion container
+    activate D
+    D->>API: Fetch JSON dataset
+    API-->>D: JSON response
+    D->>PG: Load raw JSONB into landing schema
+    PG-->>D: OK
+    deactivate D
+    D-->>W: Container exits (success)
+    W-->>R: Report task status
+    R-->>S: Ingestion complete
+
+    Note over S,PG: Transform DAG
+    S->>R: Enqueue source freshness task
+    R->>W: Worker picks up task
+    W->>D: DockerOperator: create ev-dbt container
+    activate D
+    D->>PG: dbt source freshness check
+    PG-->>D: OK (data < 30 days old)
+    deactivate D
+    D-->>W: Container exits (success)
+    W-->>R: Report task status
+    R-->>S: Freshness check complete
+
+    S->>R: Enqueue dbt build task
+    R->>W: Worker picks up task
+    W->>D: DockerOperator: create ev-dbt container
+    activate D
+    D->>PG: Build bronze (incremental)
+    D->>PG: Build silver (incremental)
+    D->>PG: Build gold (full rebuild)
+    D->>PG: Run tests (20 assertions)
+    PG-->>D: All passed
+    deactivate D
+    D-->>W: Container exits (success)
+    W-->>R: Report task status
+    R-->>S: Transform complete
+```
+
 ### Where to store the data
 
 Storing the data was unnecessary but in the real world the raw files would end up in a S3 bucket or some
