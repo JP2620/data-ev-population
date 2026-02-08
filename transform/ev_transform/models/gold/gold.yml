@@ -1,11 +1,11 @@
 version: 2
 
 models:
-  - name: gold_ev_registrations
-    description: One Big Table of currently registered EVs in Washington State. Optimized for Power BI consumption.
+  - name: dim_location
+    description: Geographic dimension for EV registrations. One row per unique location (county, city, state, zip, district, census tract).
     columns:
-      - name: dol_vehicle_id
-        description: Department of Licensing vehicle identifier. Primary key.
+      - name: location_key
+        description: Surrogate key for the location dimension.
         tests:
           - unique
           - not_null
@@ -17,17 +17,102 @@ models:
         description: City of registered owner. Defaults to 'Unknown' when missing.
         tests:
           - not_null
+      - name: state
+        description: Two-letter state code.
+      - name: zip_code
+        description: ZIP code of registered owner.
+      - name: legislative_district
+        description: Washington State legislative district number.
+      - name: census_tract_2020
+        description: 2020 Census tract identifier.
+      - name: latitude
+        description: Latitude of ZIP code centroid.
+      - name: longitude
+        description: Longitude of ZIP code centroid.
+
+  - name: dim_vehicle
+    description: Vehicle specification dimension. One row per unique combination of make, model, year, EV type, CAFV eligibility, and electric range.
+    columns:
+      - name: vehicle_key
+        description: Surrogate key for the vehicle dimension.
+        tests:
+          - unique
+          - not_null
+      - name: make
+        description: Vehicle manufacturer.
+        tests:
+          - not_null
+      - name: model
+        description: Vehicle model name.
+      - name: model_year
+        description: Vehicle model year.
+        tests:
+          - not_null
+      - name: ev_type
+        description: Electric vehicle type (BEV or PHEV).
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                - "Battery Electric Vehicle (BEV)"
+                - "Plug-in Hybrid Electric Vehicle (PHEV)"
       - name: cafv_type
         description: Clean Alternative Fuel Vehicle eligibility status.
         tests:
           - not_null
           - accepted_values:
-              arguments:
-                values:
-                  - "Eligible"
-                  - "Not Eligible"
-                  - "Unknown"
-      - name: latitude
-        description: Latitude extracted from geocoded ZIP code centroid.
-      - name: longitude
-        description: Longitude extracted from geocoded ZIP code centroid.
+              values:
+                - "Eligible"
+                - "Not Eligible"
+                - "Unknown"
+      - name: electric_range
+        description: EPA-rated electric range in miles.
+
+  - name: dim_utility
+    description: Electric utility provider dimension. One row per unique utility.
+    columns:
+      - name: utility_key
+        description: Surrogate key for the utility dimension.
+        tests:
+          - unique
+          - not_null
+      - name: electric_utility
+        description: Electric utility provider name.
+
+  - name: fact_ev_registrations
+    description: Fact table of currently registered electric vehicles in Washington State. Star schema optimized for Power BI consumption.
+    columns:
+      - name: dol_vehicle_id
+        description: Department of Licensing vehicle identifier. Primary key.
+        tests:
+          - unique
+          - not_null
+      - name: vin_1_10
+        description: First 10 characters of the Vehicle Identification Number. Degenerate dimension.
+        tests:
+          - not_null
+      - name: location_key
+        description: Foreign key to dim_location.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_location')
+              field: location_key
+      - name: vehicle_key
+        description: Foreign key to dim_vehicle.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_vehicle')
+              field: vehicle_key
+      - name: utility_key
+        description: Foreign key to dim_utility.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_utility')
+              field: utility_key
+      - name: registration_count
+        description: Registration count (always 1). Explicit measure for Power BI SUM aggregation.
+        tests:
+          - not_null

@@ -1,14 +1,19 @@
+{{
+    config(
+        materialized='ephemeral'
+    )
+}}
+
 with latest_batch as (
     select max(el_loaded_timestamp) as max_loaded_timestamp
     from {{ ref('silver_ev_data') }}
 ),
 
 source as (
-    select
-        s.*,
-        s.el_loaded_timestamp = lb.max_loaded_timestamp as is_current
+    select s.*
     from {{ ref('silver_ev_data') }} as s
     cross join latest_batch as lb
+    where s.el_loaded_timestamp = lb.max_loaded_timestamp
 )
 
 select
@@ -31,8 +36,6 @@ select
     end as cafv_type,
     electric_range,
     electric_utility,
-    is_current,
     split_part(trim(both '()' from replace(geocoded_column, 'POINT ', '')), ' ', 2)::numeric as latitude,
     split_part(trim(both '()' from replace(geocoded_column, 'POINT ', '')), ' ', 1)::numeric as longitude
 from source
-where is_current = true
