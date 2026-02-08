@@ -81,21 +81,11 @@ Log in with:
 
 ### 8. Trigger the DAGs
 
-Both DAGs are set to manual trigger only. Run them **in order**:
-
-1. **`ev_data_ingestor`** — Downloads raw EV data into the `landing` schema
-   - Find `ev_data_ingestor` in the DAGs list
+1. **`ev_pipeline`** — Ingests raw EV data, then runs dbt transformations (Bronze → Silver → Gold)
+   - Find `ev_pipeline` in the DAGs list
    - Toggle the DAG **ON** (unpause it)
    - Click the **Trigger DAG** button
    - Wait for all tasks to turn **green**
-
-2. **`ev_dbt_transform`** — Runs dbt transformations (Bronze → Silver → Gold)
-   - Find `ev_dbt_transform` in the DAGs list
-   - Toggle the DAG **ON**
-   - Click the **Trigger DAG** button
-   - Wait for all tasks to turn **green**
-
-> **Order matters!** The ingestion DAG must complete first so that dbt has data to transform.
 
 ### 9. Open the Power BI dashboard
 

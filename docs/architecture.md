@@ -34,7 +34,7 @@ sequenceDiagram
     participant API as WA.gov Socrata API
     participant PG as postgres-warehouse
 
-    Note over S,PG: Ingestion DAG
+    Note over S,PG: ev_pipeline DAG — Ingestion
     S->>R: Enqueue ingestion task
     R->>W: Worker picks up task
     W->>D: DockerOperator: create ev-ingestion container
@@ -48,7 +48,7 @@ sequenceDiagram
     W-->>R: Report task status
     R-->>S: Ingestion complete
 
-    Note over S,PG: Transform DAG
+    Note over S,PG: ev_pipeline DAG — Transform
     S->>R: Enqueue source freshness task
     R->>W: Worker picks up task
     W->>D: DockerOperator: create ev-dbt container
