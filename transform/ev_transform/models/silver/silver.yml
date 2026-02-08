@@ -1,0 +1,20 @@
+version: 2
+
+models:
+  - name: silver_ev_data
+    description: Deduplicated EV registration data with soft-delete detection. One row per vehicle.
+    columns:
+      - name: dol_vehicle_id
+        description: Department of Licensing vehicle identifier. Primary key at the silver level.
+        tests:
+          - unique
+          - not_null
+      - name: is_current
+        description: Whether the vehicle is present in the most recent batch. False indicates a soft delete.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - true
+                  - false

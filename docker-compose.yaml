@@ -357,6 +357,10 @@ services:
     build: ./ingestion
     image: ev-ingestion:latest
 
+  dbt-runner:
+    build: ./transform
+    image: ev-dbt:latest
+
 volumes:
   postgres-db-volume:
   warehouse-data:

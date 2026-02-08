@@ -1,0 +1,16 @@
+name: ev_transform
+version: '1.0.0'
+
+profile: ev_transform
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+
+models:
+  ev_transform:
+    bronze:
+      +materialized: table
+      +schema: bronze
+    silver:
+      +materialized: table
+      +schema: silver

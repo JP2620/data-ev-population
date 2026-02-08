@@ -1,0 +1,45 @@
+version: 2
+
+models:
+  - name: bronze_ev_data
+    description: Typed extraction of EV registration data from landing JSONB records.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - dol_vehicle_id
+              - el_batch_id
+    columns:
+      - name: dol_vehicle_id
+        description: Department of Licensing vehicle identifier. Natural key per batch.
+        tests:
+          - not_null
+      - name: el_batch_id
+        description: Ingestion batch identifier.
+        tests:
+          - not_null
+      - name: vin_1_10
+        description: First 10 characters of the Vehicle Identification Number.
+        tests:
+          - not_null
+      - name: model_year
+        description: Vehicle model year.
+        tests:
+          - not_null
+      - name: make
+        description: Vehicle manufacturer.
+        tests:
+          - not_null
+      - name: ev_type
+        description: Electric vehicle type (BEV or PHEV).
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - "Battery Electric Vehicle (BEV)"
+                  - "Plug-in Hybrid Electric Vehicle (PHEV)"
+      - name: state
+        description: Two-letter state code of registration.
+        tests:
+          - not_null
