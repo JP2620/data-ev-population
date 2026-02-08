@@ -4,6 +4,8 @@ An end-to-end data pipeline that ingests electric vehicle registration data from
 
 Orchestrated with **Apache Airflow**, transformed with **dbt**, and runs entirely in **Docker**.
 
+![Dashboard](docs/images/dashboard.png)
+
 ## Prerequisites
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) with **WSL 2 backend** enabled
@@ -16,7 +18,7 @@ All commands below should be run from **Git Bash**.
 ### 1. Clone the repository
 
 ```bash
-git clone <repo-url>
+git clone git@github.com:JP2620/data-ev-population.git
 cd data-ev-population
 ```
 
