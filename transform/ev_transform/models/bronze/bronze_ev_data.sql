@@ -1,3 +1,10 @@
+{{
+    config(
+        unique_key='surrogate_key',
+        incremental_strategy='delete+insert'
+    )
+}}
+
 with source as (
     select
         value,
@@ -6,6 +13,11 @@ with source as (
         el_loaded_date,
         el_input_filename
     from {{ source('landing', 'ev_raw_data') }}
+    where 1=1
+
+    {% if is_incremental() %}
+        and el_loaded_timestamp > (select max(el_loaded_timestamp) from {{ this }})
+    {% endif %}
 ),
 
 result as (
@@ -36,6 +48,7 @@ result as (
 )
 
 select
+    {{ dbt_utils.generate_surrogate_key(['dol_vehicle_id', 'el_batch_id']) }} as surrogate_key,
     vin_1_10,
     county,
     city,

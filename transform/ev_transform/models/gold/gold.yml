@@ -1,0 +1,33 @@
+version: 2
+
+models:
+  - name: gold_ev_registrations
+    description: One Big Table of currently registered EVs in Washington State. Optimized for Power BI consumption.
+    columns:
+      - name: dol_vehicle_id
+        description: Department of Licensing vehicle identifier. Primary key.
+        tests:
+          - unique
+          - not_null
+      - name: county
+        description: County of registered owner. Defaults to 'Unknown' when missing.
+        tests:
+          - not_null
+      - name: city
+        description: City of registered owner. Defaults to 'Unknown' when missing.
+        tests:
+          - not_null
+      - name: cafv_type
+        description: Clean Alternative Fuel Vehicle eligibility status.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - "Eligible"
+                  - "Not Eligible"
+                  - "Unknown"
+      - name: latitude
+        description: Latitude extracted from geocoded ZIP code centroid.
+      - name: longitude
+        description: Longitude extracted from geocoded ZIP code centroid.
