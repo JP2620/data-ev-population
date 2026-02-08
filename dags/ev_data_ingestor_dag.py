@@ -19,6 +19,7 @@ with DAG(
         command='python ingest.py',
         docker_url='unix:///var/run/docker.sock',
         network_mode='data-ev-population_default',
+        mount_tmp_dir=False,
         environment={
             "DB_HOST": Variable.get("DB_HOST"),
             "DB_USER": Variable.get("DB_USER"),
