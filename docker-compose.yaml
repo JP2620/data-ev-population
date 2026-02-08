@@ -64,6 +64,12 @@ x-airflow-common:
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__CORE__EXECUTION_API_SERVER_URL: 'http://airflow-apiserver:8080/execution/'
+    AIRFLOW_VAR_DB_HOST: postgres-warehouse
+    AIRFLOW_VAR_DB_USER: "${POSTGRES_USER}"
+    AIRFLOW_VAR_DB_PASSWORD: "${POSTGRES_PASSWORD}"
+    AIRFLOW_VAR_DB_PORT: 5432
+    AIRFLOW_VAR_DB_NAME: "${POSTGRES_DB}"
+    AIRFLOW_VAR_HOST_DATA_DIR: "${PWD}/data"
     # yamllint disable rule:line-length
     # Use simple http server on scheduler for health checks
     # See https://airflow.apache.org/docs/apache-airflow/stable/administration-and-deployment/logging-monitoring/check-health.html#scheduler-health-check-server
@@ -348,8 +354,8 @@ services:
       - "5433:5432"
 
   python-runner:
-    image: python:3.12-alpine3.22
-    command: ["python", "-c", "print('hello world')"]
+    build: ./ingestion
+    image: ev-ingestion:latest
 
 volumes:
   postgres-db-volume:
